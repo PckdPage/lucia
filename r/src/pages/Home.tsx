@@ -1,14 +1,13 @@
 import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query"; //manages asynchronous state
 import { useNavigate } from "react-router-dom";
 import HomeLoggedIn from "../components/main/HomeLoggedIn";
-
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
 const Home = () => {
   const navigate = useNavigate();
-  const { isError, isLoading } = useQuery({
+  const { isError, isLoading } = useQuery({ // verifies if the user is logged in or not 
     queryKey: ["verify"],
     queryFn: async () => {
       await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/verify`, {

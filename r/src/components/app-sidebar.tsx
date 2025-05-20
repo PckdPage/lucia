@@ -2,18 +2,10 @@ import * as React from "react";
 
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectedTodo } from "../store/todoSlice";
-import { FiChevronUp } from "react-icons/fi";
 
 import {
-  Tally1,
-  Tally2,
-  Tally3,
-  File,
-  UserRoundPen,
-  Store,
   Plus,
   Moon,
-  AlertTriangle,
 } from "lucide-react";
 
 import { NavUser } from "@/components/nav-user";
@@ -25,9 +17,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
-  SidebarInput,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
@@ -41,7 +31,7 @@ import DialogContentComp from "./main/DiaLogContentComp";
 import { useQueryClient } from "@tanstack/react-query";
 
 //sample data aaile lai
-const normalData = {
+const normalData = { 
   user: {
     name: "User",
     email: "m@example.com",
@@ -53,17 +43,17 @@ const normalData = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch(); //to dispatch actions to redux
   //eta
-  const [activeItem, setActiveItem] = React.useState(normalData.navMain[0]);
-  const { setOpen } = useSidebar();
-
-  const [darkMode, setDarkMode] = React.useState(() => {
-    const storedDarkMode = localStorage.getItem("darkMode");
+  const [activeItem, setActiveItem] = React.useState(normalData.navMain[0]); //to trach active nav items
+  const { setOpen } = useSidebar(); //setopen is obtained from hook to control sidebar openstate
+ 
+  const [darkMode, setDarkMode] = React.useState(() => { //initialized to track if dark mode is enabled then checks storage for prev stored values.
+    const storedDarkMode = localStorage.getItem("darkMode"); 
     return storedDarkMode === "true";
   });
 
-  React.useEffect(() => {
+  React.useEffect(() => { //effect hook updates based on state and stores value in local storage
     if (darkMode) {
       document.documentElement.classList.add("dark");
     } else {
@@ -73,15 +63,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [darkMode]);
 
   const [filters, setFilters] = React.useState({
-    // category: "Work",
     // priority: "Low",
   });
 
-  const { data } = useQuery({
+  const { data } = useQuery({ //usequery hook is used to fetch todo data from server
     queryKey: ["todoData", filters],
     queryFn: async () => {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/api/getTodo`,
+      const response = await axios.get( //get req to backend api to retrieve todo items
+        `${import.meta.env.VITE_BACKEND_URL}/api/getTodo`, //env variable for backend url
         {
           withCredentials: true,
           params: filters,
@@ -92,9 +81,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   });
   console.log(data);
 
-  const queryClient = useQueryClient();
-
-  const getReadableData = (string: string): string => {
+  const getReadableData = (string: string): string => { 
+    //takes date string as input and formats into readabel format using tolocalstring which specifies time zone and date and time
     const date = new Date(string);
     const formattedDate = date.toLocaleString("en-US", {
       timeZone: "Asia/Kathmandu",
@@ -108,7 +96,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return formattedDate;
   };
 
-  const [addOpen, setAddOpen] = React.useState(false);
+  const [addOpen, setAddOpen] = React.useState(false); //initialized to manage state of dialog for adding or editing todo
 
   type Todo = {
     id: string;
@@ -120,7 +108,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     addedDate: string;
     userId: string;
   };
-  const [openCategory, setOpenCategory] = React.useState<string | null>(null);
+  //to track which cat of todo is expanded in sidebar actively
+  const [openCategory, setOpenCategory] = React.useState<string | null>(null); 
+
+  //var created by reducing fetched data array by category 
+  //key is cat and valye is array of todo in that category
   const groupedTodos = (data?.Todo || []).reduce((acc: any, todo: any) => {
     if (!acc[todo.category]) {
       acc[todo.category] = [];
@@ -129,10 +121,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return acc;
   }, {} as Record<string, Todo[]>);
 
-  const selectedTodo = useSelector((state: any) => state.todo.selectedTodo);
+  const selectedTodo = useSelector((state: any) => state.todo.selectedTodo); //is retrieved from redux store
 
   return (
-    <Sidebar
+    <Sidebar  // two sidebar one of use profile and nav item and another one for displaying todo categoryies
       collapsible="icon"
       className="overflow-hidden *:data-[sidebar=sidebar]:flex-row"
       {...props}
@@ -236,10 +228,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             <li
                               key={todo.id}
                               className="p-3 border rounded-md shadow-sm bg-gray-50 dark:bg-gray-700"
-                              onClick={() => dispatch(setSelectedTodo(todo))}
+                              // onClick={() => dispatch(setSelectedTodo(todo))}
                             >
                               <Dialog open={addOpen} onOpenChange={setAddOpen}>
-                                <DialogTrigger className="w-full flex flex-col gap-3">
+                                <DialogTrigger className="w-full flex flex-col gap-3" onClick={() => dispatch(setSelectedTodo(todo))}>
+
                                   <div className="flex">
                                     {todo.priority === "High" ? (
                                       <span className="flex items-center bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
